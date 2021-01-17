@@ -29,8 +29,7 @@ type RedisDB struct {
 }
 
 func (r *RedisDB) InitDB() {
-	dbPort := os.Getenv("DBPORT")
-	conn, err := redis.Dial("tcp", "localhost:" + dbPort)
+	conn, err := redis.Dial("tcp", os.Getenv("REDIS_URL"), redis.DialPassword(os.Getenv("REDIS_PASS")))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,7 +68,7 @@ func (r RedisDB) Get(token, key string) (error, string) {
 }
 
 func (r RedisDB) CheckIfTokenExists(key string) bool {
-	ret, err := redis.Bool(r.appData.Do("EXISTS", PreTokens+ key))
+	ret, err := redis.Bool(r.appData.Do("EXISTS", PreTokens+key))
 	checkErr(err)
 
 	return ret
