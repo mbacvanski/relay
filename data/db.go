@@ -1,9 +1,10 @@
-package db
+package data
 
 import (
 	"fmt"
 	"github.com/gomodule/redigo/redis"
 	"log"
+	"os"
 	"time"
 )
 
@@ -28,7 +29,8 @@ type RedisDB struct {
 }
 
 func (r *RedisDB) InitDB() {
-	conn, err := redis.Dial("tcp", "localhost:6379")
+	dbPort := os.Getenv("DBPORT")
+	conn, err := redis.Dial("tcp", "localhost:" + dbPort)
 	if err != nil {
 		log.Fatal(err)
 	}

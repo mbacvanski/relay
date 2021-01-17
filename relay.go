@@ -2,21 +2,27 @@ package main
 
 import (
 	"fmt"
+	"github.com/gorilla/handlers"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
-	db2 "relay/db"
+	"os"
+	"relay/data"
 )
 
-var db db2.RedisDB
+var db data.RedisDB
 
 func main() {
+	_ = godotenv.Load()
+
 	db.InitDB()
 
 	http.HandleFunc("/", index)
 	http.HandleFunc("/registerToken", registerToken)
 	http.HandleFunc("/set", set)
 	http.HandleFunc("/get", get)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"),
+		handlers.LoggingHandler(os.Stdout, http.DefaultServeMux)))
 }
 
 func index(w http.ResponseWriter, _ *http.Request) {
@@ -24,7 +30,6 @@ func index(w http.ResponseWriter, _ *http.Request) {
 	if err != nil {
 		fmt.Println("Oh no" + err.Error())
 	}
-	fmt.Println("Sent response")
 }
 
 func set(w http.ResponseWriter, r *http.Request) {
@@ -63,13 +68,13 @@ func get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err, data := db.Get(token, key)
+	err, ret := db.Get(token, key)
 	if !checkErr(err) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	_, err = fmt.Fprintln(w, data)
+	_, err = fmt.Fprintln(w, ret)
 	checkErr(err)
 }
 
@@ -91,7 +96,7 @@ func registerToken(w http.ResponseWriter, r *http.Request) {
 
 /*
 Returns false if there was an error, otherwise true.
- */
+*/
 func checkErr(err error) bool {
 	if err != nil {
 		// Do more logging here
