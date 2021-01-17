@@ -70,7 +70,7 @@ func get(w http.ResponseWriter, r *http.Request) {
 
 	err, ret := db.Get(token, key)
 	if !checkErr(err) {
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 

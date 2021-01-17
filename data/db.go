@@ -63,6 +63,10 @@ func (r RedisDB) Get(token, key string) (error, string) {
 	if !checkErr(err) {
 		return err, ""
 	}
+	if ret == nil {
+		return nil, ""
+	}
+
 	str, err := redis.String(ret, nil)
 	return err, str
 }
